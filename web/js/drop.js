@@ -76,7 +76,7 @@ const containerURL = new azblob.ContainerURL(
 async function uploadFile(file){
     try {
         reportStatus("Uploading files...");
-        reportStatus(containerURL)
+        reportStatus(containerURL.url)
         const promises = [];
         const blockBlobURL = azblob.BlockBlobURL.fromContainerURL(containerURL, file.name);
         promises.push(azblob.uploadBrowserDataToBlockBlob(
