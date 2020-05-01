@@ -45,6 +45,10 @@ UPLOAD_CONTAINER="incoming"
 # date the SAS expires (5 days as coded)
 EXPIRY=$(date +%Y-%m-%d -d "$(date) + 5 day")
 EXPIRY=$EXPIRY"T00:00:00Z"
+GIT_ROOT="git"
+REPO="https://github.com/davew-msft/blob-data-sharing"
+FOLDER="blob-data-sharing"
+AMPR="&"
 
 az account set -s "$SUBSCRIPTION"
 az group create -n $RES_GROUP -l $LOCATION
@@ -81,18 +85,46 @@ az storage cors add \
     --max-age 86400
 
 # build the upload container, this is where customer data gets uploaded
+az storage container create \
+    -n $UPLOAD_CONTAINER \
+    --account-name $ACCT_NAME \
+    --subscription "$SUBSCRIPTION"
 
 # create a SAS token to upload container
 SAS=$(az storage container generate-sas \
     --account-name $ACCT_NAME \
     --name $UPLOAD_CONTAINER \
-    --permissions acw \
+    --permissions acwl \
     --expiry "$EXPIRY" \
-    --auth-mode key )
+    --auth-mode key | tr -d \") 
 
 # upload the static website assets
+# to do this we are going to create a root git folder in cloudshell
+# then cd into it
+# then clone this repo which has the static website assets
+# then we can push the static assets to our storage account
+mkdir -p $GIT_ROOT
+cd $GIT_ROOT
+git clone $REPO $FOLDER
+
+# this syntax assumes running from cloud shell.  You may not need the backslash in \$web otherwise
+az storage blob upload-batch \
+    -s $FOLDER/web \
+    -d \$web \
+    --account-name $ACCT_NAME \
+    --content-type 'text/html; charset=utf-8'
+
+echo "This is the link to give to customers, try it out first:"
+# https://<url>/index.html<SASKey>&accountName=<accountname>&containerName=<containername>
+echo $URL$INDEX_DOC?$SAS$AMPRaccountName=$ACCT_NAME$AMPRcontainerName=$UPLOAD_CONTAINER
+# https://dkfjekfcurt.z13.web.core.windows.net/upload.html?se=2020-05-06T00%3A00%3A00Z&sp=acwl&sv=2018-11-09&sr=c&sig=CHjXCuY20aYUSyzD%2BRB6Pr1s89R8a7x2yCeuDx2RRvA%3D&accountName=dkfjekfcurt&containerName=incoming
 
 
+https://dkfjekfcurt.blob.core.windows.net/incoming?se=2020-05-06T00%3A00%3A00Z
+&sp=acwl
+&sv=2018-11-09
+&sr=c
+&sig=CHjXCuY20aYUSyzD%2BRB6Pr1s89R8a7x2yCeuDx2RRvA%3D
 ```
 
 
