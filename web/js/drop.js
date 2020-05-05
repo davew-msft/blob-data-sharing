@@ -57,15 +57,21 @@ const accountName = searchParams.get("accountName");
 const containerName = searchParams.get("containerName");
 
 //regenerate the valid SAS key
+const sv = searchParams.get("sv");
 var sasString = "?";//reinsert the ?
-const se = searchParams.get("se");
-sasString += "se=" + se;
+sasString += "sv=" + sv;
+const ss = searchParams.get("ss");
+sasString += "&ss=" + ss;
+const srt = searchParams.get("srt");
+sasString += "&srt=" + srt;
 const sp = searchParams.get("sp");
 sasString += "&sp=" + sp;
-const sv = searchParams.get("sv");
-sasString += "&sv=" + sv;
-const sr = searchParams.get("sr");
-sasString += "&sr=" + sr;
+const se = searchParams.get("se");
+sasString += "&se=" + se;
+//const st = searchParams.get("st");
+//sasString += "&st=" + st;
+//const spr = searchParams.get("spr");
+//sasString += "&spr=" + spr;
 const sig = searchParams.get("sig");
 sasString += "&sig=" + encodeURIComponent(sig);//must be encoded
 
@@ -75,8 +81,9 @@ const containerURL = new azblob.ContainerURL(
 
 async function uploadFile(file){
     try {
-        reportStatus("Uploading files...");
+        reportStatus("Uploading files test...");
         reportStatus(containerURL.url)
+        reportStatus(file.name)
         const promises = [];
         const blockBlobURL = azblob.BlockBlobURL.fromContainerURL(containerURL, file.name);
         promises.push(azblob.uploadBrowserDataToBlockBlob(
