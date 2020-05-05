@@ -50,7 +50,6 @@ EXPIRY=$(date +%Y-%m-%d -d "$(date) + 5 day")
 GIT_ROOT="git"
 REPO="https://github.com/davew-msft/blob-data-sharing"
 FOLDER="blob-data-sharing"
-AMPR="&"
 
 # other vars 
 EXPIRY=$EXPIRY"T00:00:00Z"
